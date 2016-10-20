@@ -1,0 +1,153 @@
+<script>
+
+JSF.room_personal_2016 = 'http://vj1.6rooms.com/mini/js/room_personal_2016_27.js';
+JSF.publish_player = 'http://vj1.6rooms.com/mini/js/publish_player_6.js';
+//JSF.publish_player = '/js/room/src/room_personal_new/PublishPlayer.js';
+
+
+$LAB.script(JSF.login).wait(function(){
+	Login.write();
+})
+.script(JSF.swf).wait(function(){
+
+	window.tanmuInitFinish = function(){
+		this.liaotianzimu=1;
+	}
+
+	if(page.puid != _puser.uid && page.liveType ==0 && page.myVideo.url!=''){  // 录像 //type=2为图片录像已经废除
+		page.isVideo=1;
+		swfobject.embedSWF(__PLAYER.video, 'videoPlayer', '100%', '100%', '10.1', __NOF, {vid:page.myVideo.url, pvid:page.myVideo.url, flag:1, model:1, autoplay:1}, {wmode:'opaque', bgcolor:'#282828'});
+	}else{
+		if(page.puid == _puser.uid){ // 房主
+			(function(){
+
+				page.liveMaster=1;
+									_size='800*600';
+					_fps = 15;
+					_bitrate= 300
+								size = _size.split('*');
+				//目前没用到
+				window.cameraReady = function(){
+					window.isCameraReady = 1;
+				}
+				Plugin.box='player';
+
+				if(location.href.indexOf('?b')>-1){
+					$LAB.script(JSF.publish_player).wait(function(){
+						livePublishPlayer.show({
+							swfBoxId: 'videoPlayer',
+							readFun: 'cameraReady',
+							user: _puser,
+							size: size,
+							bitrate: _bitrate,
+							fps: _fps
+						});
+					});
+				}else{
+					swfobject.embedSWF(__CAMERA.base, "videoPlayer", '100%', '100%', "10.1", __NOF, {bitrate:_bitrate, uid: _puser.uid, userPassword:_puser.encpass, cameraWidth:size[0], cameraHeight:size[1], fps:_fps, domain:pageMessage.domain, readyFun:'cameraReady'}, {wmode:'opaque', allowscriptaccess:'always', bgcolor:'#21201B'}, {id:'videoPlayer'});
+				}
+			})();
+
+
+		}else{
+
+			var _initVideoWidth = '',
+				_initVideoHeight = '';
+			if( page.flvTitle[1] && page.flvTitle[1].updRateType > 2 ){
+				_initVideoWidth = '560';
+				_initVideoHeight = '420';
+			};
+
+			//目前没用
+			window.playerReady = function(){
+				window.isPlayerReady = 1;
+			}
+			window.showDanmu = function(act){
+				page.isDanMu = (act=='0')?false:true;
+			}
+
+			var isRecord = '1';
+			var autoPlay = page.liveType==10?'true':'';
+			/**
+			if(page.rid==40460723 || page.rid == 15238913){
+				__PLAYER.base = '/apple/player/roomLivePlayer1.4_test.swf';
+			}
+			**/
+			var _flv = (page.flvTitle[1]&&page.flvTitle[1].flvtitle)?page.flvTitle[1].flvtitle:'',
+				_flvs = _flv==''?'': _flv;
+			if(page.flvTitle[1].secflvtitle){
+				_flvs = _flvs+','+page.flvTitle[1].secflvtitle;
+			};
+			swfobject.embedSWF(__PLAYER.base, 'videoPlayer', '100%', '100%', '10.1', __NOF, {mute:0, fileName:_flv, streamNames:_flvs, autoplay:autoPlay/*自动取流*/, ruid:page.rid, uid:pageMessage.user.uid, isRecordBtn:isRecord/1,  readyFun:'playerReady', initVideoWidth:_initVideoWidth,initVideoHeight:_initVideoHeight, rioIps:'125.78.248.136,219.146.243.181,112.253.2.254,60.12.148.187,111.11.31.235,118.144.131.40', isPhoneLive:0,bg:(page.posterPic!=''?'https://vi1.6rooms.com/live/2016/05/29/00/1010v1464452482651323647_s.jpg':'https://vi1.6rooms.com/live/2016/10/20/23/1007v1476976087317777655_s.jpg') }, {allowscriptaccess:'always', wmode:'Opaque', bgcolor:'#21201B'});
+
+		}
+	}
+})
+.script(JSF.z).wait(function(){
+	new ControlCenter({centerBtn:'#myAccountTool'});
+
+	if(jQuery.browser.msie && jQuery.browser.version == '6.0'){
+		$LAB.script(JSF.png).wait(function(){
+			DD_belatedPNG.fix('.fixpng');
+		});
+	}
+
+	if(page.rid == _puser.uid){ // 房主视频认证
+		jQuery.ajax({
+			type:'get',
+			url:'room/isValidateChack.php',
+			data:{rid:_puser.uid},
+			success:function(obj){
+				if(obj == 1){
+					Prompt.create({//视频认证提示弹框，1为未认证，0为已认证。
+						title:'尊敬的用户您好：',
+						content:'<p>您已经提交了签约主播申请，尚未完成视频认证，请尽快完成视频认证，以便您顺利通过签约审核。<br><b>（视频认证内容将严格保密并仅供认证使用）</b></p>',
+						btn_sure:{text:'呼叫审核',link:"javascript:window.open('http://crm2.qq.com/page/portalpage/wpa.php?uin=800066892&amp;f=1&amp;ty=1', '_blank', 'height=544, width=644,toolbar=no,scrollbars=no,menubar=no,status=no');void(0)"}
+					});
+				}else if(obj == 2){
+					Prompt.create({//视频认证提示弹框，1为未认证，0为已认证。
+						title:'尊敬的用户您好：',
+						content:'<p>您的实名制认证照片未通过，请重新修改后提交！<br></p>',
+						btn_sure:{text:'立即修改',link:"/user/applyLive.php"}
+					});
+				}
+			}
+		});
+	}
+
+})
+.script(JSF.gift).wait()
+.script(JSF.room_2016).wait(function(){
+
+	AddReady(function(){
+		var $ = jQuery;
+		setTimeout(function(){
+			var _imgs = $('img[data-src]');
+			$.each(_imgs, function(){
+				var _img = $(this);
+				_img.attr('src', _img.attr('data-src'));
+			});
+
+		},7000);
+
+		Pres[536].u=6;
+		Pres[430].u=6;
+		Pres[599].u=5;
+
+		$LAB.script(JSF.room_personal_2016).wait(function(){
+			Room.init();
+			Room.Poser.init();
+
+		});
+
+		if (!window.PARTNER) {
+			$('#promo-seat').css('display', 'block');
+		}
+
+		$LAB.script(JSF.live_list_panel_2016);
+
+	});
+
+})
+.script(JSF.im);
+</script>
